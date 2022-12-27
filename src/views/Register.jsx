@@ -15,6 +15,7 @@ export default function Register() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [agree, setAgree] = useState(false);
     const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     const resetFormData = () => {
         setAgree(false);
@@ -30,7 +31,13 @@ export default function Register() {
         if (responseError?.data) {
             setError(responseError?.data);
         }
-    }, [data, responseError]);
+        if (isSuccess) {
+            resetFormData();
+            setTimeout(() => {
+                navigate('/inbox');
+            }, 2000);
+        }
+    }, [data, responseError, navigate, isSuccess]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -38,18 +45,15 @@ export default function Register() {
         if (agree === false) {
             setError('You did not accept our terms and conditions');
         } else if (password !== confirmPassword) {
-            setError('Your password and confirm password did not match');
+            setError('Password and confirm password did not match');
         } else {
             register({
                 name,
                 email,
                 password,
             });
-            resetFormData();
         }
     };
-
-    const navigate = useNavigate();
 
     if (isSuccess) {
         toast.success('Registration Successfull!', {
@@ -63,9 +67,6 @@ export default function Register() {
             progress: undefined,
             theme: 'light',
         });
-        setTimeout(() => {
-            navigate('/inbox');
-        }, 2000);
     }
 
     return (
