@@ -175,6 +175,18 @@ export default function Register() {
                             </div>
                         </div>
 
+                        <div className="flex items-center justify-end">
+                            <div className="text-sm">
+                                <span>Already have an account? &nbsp; </span>
+                                <Link
+                                    to="/"
+                                    className="font-medium text-violet-600 hover:text-violet-500"
+                                >
+                                    Login
+                                </Link>
+                            </div>
+                        </div>
+
                         <div>
                             <button
                                 type="submit"
