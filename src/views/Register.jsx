@@ -1,7 +1,12 @@
+/* eslint-disable no-alert */
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import logoImage from '../assets/images/lws-logo-light.svg';
+import Error from '../components/ui/Error';
+import { useRegisterMutation } from '../rtk/features/auth/authAPI';
 
 export default function Register() {
     const [name, setName] = useState('');
@@ -9,17 +14,59 @@ export default function Register() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [agree, setAgree] = useState(false);
+    const [error, setError] = useState('');
+
+    const resetFormData = () => {
+        setAgree(false);
+        setName('');
+        setConfirmPassword('');
+        setPassword('');
+        setEmail('');
+    };
+
+    const [register, { data, isLoading, isSuccess, error: responseError }] = useRegisterMutation();
+
+    useEffect(() => {
+        if (responseError?.data) {
+            setError(responseError?.data);
+        }
+    }, [data, responseError]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log({
-            name,
-            email,
-            password,
-            confirmPassword,
-            agree,
-        });
+        setError('');
+        if (agree === false) {
+            setError('You did not accept our terms and conditions');
+        } else if (password !== confirmPassword) {
+            setError('Your password and confirm password did not match');
+        } else {
+            register({
+                name,
+                email,
+                password,
+            });
+            resetFormData();
+        }
     };
+
+    const navigate = useNavigate();
+
+    if (isSuccess) {
+        toast.success('Registration Successfull!', {
+            toastId: 'success1',
+            position: 'top-right',
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: 'light',
+        });
+        setTimeout(() => {
+            navigate('/inbox');
+        }, 2000);
+    }
 
     return (
         <div className="grid place-items-center h-screen bg-[#F9FAFB">
@@ -38,7 +85,6 @@ export default function Register() {
                         </h2>
                     </div>
                     <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                        <input type="hidden" name="remember" value="true" />
                         <div className="rounded-md shadow-sm -space-y-px">
                             <div>
                                 <label htmlFor="name" className="sr-only">
@@ -131,13 +177,16 @@ export default function Register() {
                         <div>
                             <button
                                 type="submit"
-                                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500"
+                                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-violet-600 hover:bg-violet-700 focus:outline-none"
+                                disabled={isLoading}
                             >
                                 <span className="absolute left-0 inset-y-0 flex items-center pl-3" />
                                 Sign up
                             </button>
                         </div>
+                        {error && <Error message={error} />}
                     </form>
+                    <ToastContainer />
                 </div>
             </div>
         </div>

@@ -1,9 +1,11 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import logoImage from '../assets/images/lws-logo-light.svg';
 import Error from '../components/ui/Error';
 
 export default function Login() {
+    const [error, setError] = useState('');
     return (
         <div className="grid place-items-center h-screen bg-[#F9FAFB">
             <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -73,7 +75,7 @@ export default function Login() {
                             </button>
                         </div>
 
-                        <Error message="There was an error" />
+                        {error && <Error message={error} />}
                     </form>
                 </div>
             </div>
