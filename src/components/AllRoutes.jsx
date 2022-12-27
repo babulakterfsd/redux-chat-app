@@ -6,6 +6,8 @@ import Home from '../views/Home';
 import Inbox from '../views/Inbox';
 import NotFound from '../views/NotFound';
 import Register from '../views/Register';
+import PrivateRoute from './PrivateRoute';
+import PublicRoute from './PublicRoute';
 
 function AllRoutes() {
     const authChecked = useAuthCheck();
@@ -14,11 +16,39 @@ function AllRoutes() {
         <div>Checking Authentication...</div>
     ) : (
         <Routes>
-            <Route path="/" element={<Home />} />
+            <Route
+                path="/"
+                element={
+                    <PublicRoute>
+                        <Home />
+                    </PublicRoute>
+                }
+            />
             <Route path="/home" element={<Navigate to="/" replace />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/inbox" element={<Conversation />} />
-            <Route path="/inbox/:id" element={<Inbox />} />
+            <Route
+                path="/register"
+                element={
+                    <PublicRoute>
+                        <Register />
+                    </PublicRoute>
+                }
+            />
+            <Route
+                path="/inbox"
+                element={
+                    <PrivateRoute>
+                        <Conversation />
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/inbox/:id"
+                element={
+                    <PrivateRoute>
+                        <Inbox />
+                    </PrivateRoute>
+                }
+            />
             <Route path="*" element={<NotFound />} />
         </Routes>
     );
