@@ -1,4 +1,4 @@
-import blankImage from "../../../assets/images/blank.svg";
+import blankImage from '../../../assets/images/blank.svg';
 
 export default function Blank() {
     return (
@@ -7,8 +7,7 @@ export default function Blank() {
                 <img src={blankImage} alt="Nothing here!" className="w-20" />
             </div>
             <div className="text-center">
-                No messages selected! Select an user from left sidebar to view
-                all messages
+                No messages selected! Select an user from left sidebar to view all messages
             </div>
         </div>
     );
