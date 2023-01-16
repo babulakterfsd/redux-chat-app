@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import logoImage from '../assets/images/lws-logo-light.svg';
 import Error from '../components/ui/Error';
@@ -34,20 +33,6 @@ export default function Login() {
             password,
         });
     };
-
-    if (isSuccess) {
-        toast.success('Login Successfull !', {
-            toastId: 'success1',
-            position: 'top-right',
-            autoClose: 1000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: 'light',
-        });
-    }
 
     return (
         <div className="grid place-items-center h-screen bg-[#F9FAFB">

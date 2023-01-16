@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import logoImage from '../assets/images/lws-logo-light.svg';
 import Error from '../components/ui/Error';
@@ -25,19 +25,20 @@ export default function Register() {
         setEmail('');
     };
 
-    const [register, { data, isLoading, isSuccess, error: responseError }] = useRegisterMutation();
+    const [register, { data, isLoading, isSuccess: registerSuccess, error: responseError }] =
+        useRegisterMutation();
 
     useEffect(() => {
         if (responseError?.data) {
             setError(responseError?.data);
         }
-        if (isSuccess) {
+        if (registerSuccess) {
             resetFormData();
             setTimeout(() => {
                 navigate('/inbox');
             }, 2000);
         }
-    }, [data, responseError, navigate, isSuccess]);
+    }, [data, responseError, navigate, registerSuccess]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -54,20 +55,6 @@ export default function Register() {
             });
         }
     };
-
-    if (isSuccess) {
-        toast.success('Registration Successfull!', {
-            toastId: 'success1',
-            position: 'top-right',
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: 'light',
-        });
-    }
 
     return (
         <div className="grid place-items-center h-screen bg-[#F9FAFB">
@@ -164,7 +151,7 @@ export default function Register() {
                                     type="checkbox"
                                     className="h-4 w-4 text-violet-600 focus:ring-violet-500 border-gray-300 rounded"
                                     checked={agree}
-                                    onChange={(e) => setAgree(!agree)}
+                                    onChange={() => setAgree(!agree)}
                                 />
                                 <label
                                     htmlFor="accept-terms"

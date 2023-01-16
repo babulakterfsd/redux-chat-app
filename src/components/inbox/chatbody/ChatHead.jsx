@@ -1,22 +1,13 @@
 import gravatarUrl from 'gravatar-url';
 import { useSelector } from 'react-redux';
+import getPartnerInfo from '../../../utils/getPartnerInfo';
 
 export default function ChatHead({ headInfo }) {
     const { sender, receiver } = headInfo;
     const { user } = useSelector((state) => state.auth || {});
     const { email } = user || {};
-
-    const getPartner = () => {
-        let partner = {};
-        if (sender?.email === email) {
-            partner = receiver;
-        } else {
-            partner = sender;
-        }
-        return partner;
-    };
-
-    const partner = getPartner();
+    const participants = [sender, receiver];
+    const partner = getPartnerInfo(participants, email);
 
     return (
         <div className="relative flex items-center p-3 border-b border-gray-300">
