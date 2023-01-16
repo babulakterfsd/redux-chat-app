@@ -1,12 +1,18 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 
 import { useState } from 'react';
+import { useGetUserQuery } from '../../rtk/features/users/usersAPI';
 import isVlaidEmail from '../../utils/isValidEmail';
+import Error from '../ui/Error';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 export default function Modal({ open, control }) {
     const [to, setTo] = useState('');
     const [message, setMessage] = useState('');
+    const [userCheck, setUserCheck] = useState(false);
+    const { data: participant } = useGetUserQuery(to, {
+        skip: !userCheck,
+    });
 
     const debounceHandler = (fn, delay) => {
         let timeOutId;
@@ -20,6 +26,7 @@ export default function Modal({ open, control }) {
 
     const doSearch = (value) => {
         if (isVlaidEmail(value)) {
+            setUserCheck(true);
             setTo(value);
         }
     };
@@ -79,7 +86,7 @@ export default function Modal({ open, control }) {
                             </button>
                         </div>
 
-                        {/* <Error message="There was an error" /> */}
+                        {participant?.length === 0 && <Error message="User does not exist !" />}
                     </form>
                 </div>
             </>
