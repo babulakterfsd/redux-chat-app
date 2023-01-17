@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     conversationsApi,
     useAddConversationMutation,
+    // eslint-disable-next-line prettier/prettier
     useEditConversationMutation
 } from '../../rtk/features/conversations/conversationsAPI';
 import { useGetUserQuery } from '../../rtk/features/users/usersAPI';
@@ -24,6 +25,8 @@ export default function Modal({ open, control }) {
     const { data: participant } = useGetUserQuery(to, {
         skip: !userCheck,
     });
+    const { data: loggedInUsersFullInformation } = useGetUserQuery(loggedInUserEmail);
+
     const dispatch = useDispatch();
 
     const [addConversation, { isSuccess: isAddConversationSuccess }] = useAddConversationMutation();
@@ -80,7 +83,7 @@ export default function Modal({ open, control }) {
                 sender: loggedInUserEmail,
                 data: {
                     participants: `${loggedInUserEmail}-${participant[0].email}`,
-                    users: [user, participant[0]],
+                    users: [loggedInUsersFullInformation[0], participant[0]],
                     message,
                     timestamp: new Date().getTime(),
                 },
@@ -90,7 +93,7 @@ export default function Modal({ open, control }) {
                 sender: loggedInUserEmail,
                 data: {
                     participants: `${loggedInUserEmail}-${participant[0].email}`,
-                    users: [user, participant[0]],
+                    users: [loggedInUsersFullInformation[0], participant[0]],
                     message,
                     timestamp: new Date().getTime(),
                 },
