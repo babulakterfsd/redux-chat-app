@@ -1,6 +1,9 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { conversationsApi } from '../../rtk/features/conversations/conversationsAPI';
 import { useGetUserQuery } from '../../rtk/features/users/usersAPI';
 import isVlaidEmail from '../../utils/isValidEmail';
 import Error from '../ui/Error';
@@ -10,9 +13,30 @@ export default function Modal({ open, control }) {
     const [to, setTo] = useState('');
     const [message, setMessage] = useState('');
     const [userCheck, setUserCheck] = useState(false);
+    const [responseError, setResponseError] = useState('');
+    const [conversation, setConversation] = useState(undefined);
+    const { user } = useSelector((state) => state.auth || {});
+    const { email: loggedInUserEmail } = user || {};
     const { data: participant } = useGetUserQuery(to, {
         skip: !userCheck,
     });
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (participant?.length > 0 && participant[0]?.email !== loggedInUserEmail) {
+            dispatch(
+                conversationsApi.endpoints.getConversation.initiate({
+                    userEmail: loggedInUserEmail,
+                    participantEmail: participant[0]?.email,
+                })
+            )
+                .unwrap()
+                .then((data) => setConversation(data))
+                .catch(() => {
+                    setResponseError('There was a problem');
+                });
+        }
+    }, [participant, loggedInUserEmail, dispatch]);
 
     const debounceHandler = (fn, delay) => {
         let timeOutId;
@@ -26,12 +50,17 @@ export default function Modal({ open, control }) {
 
     const doSearch = (value) => {
         if (isVlaidEmail(value)) {
-            setUserCheck(true);
             setTo(value);
+            setUserCheck(true);
         }
     };
 
     const handleSearch = debounceHandler(doSearch, 500);
+
+    const sendMesaageFormHandler = (e) => {
+        e.preventDefault();
+        console.log('form submitted');
+    };
 
     return (
         open && (
@@ -44,7 +73,7 @@ export default function Modal({ open, control }) {
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
                         Send message
                     </h2>
-                    <form className="mt-8 space-y-6">
+                    <form className="mt-8 space-y-6" onSubmit={sendMesaageFormHandler}>
                         <div className="rounded-md shadow-sm -space-y-px">
                             <div>
                                 <label htmlFor="to" className="sr-only">
@@ -69,7 +98,7 @@ export default function Modal({ open, control }) {
                                     name="message"
                                     type="text"
                                     required
-                                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm"
+                                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm disabled:cursor-not-allowed"
                                     placeholder="Message"
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
@@ -81,12 +110,21 @@ export default function Modal({ open, control }) {
                             <button
                                 type="submit"
                                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500"
+                                disabled={
+                                    conversation === undefined ||
+                                    (participant?.length > 0 &&
+                                        participant[0].email === loggedInUserEmail)
+                                }
                             >
                                 Send Message
                             </button>
                         </div>
 
                         {participant?.length === 0 && <Error message="User does not exist !" />}
+                        {participant?.length > 0 && participant[0].email === loggedInUserEmail && (
+                            <Error message="You can not chat with yourself !" />
+                        )}
+                        {responseError && <Error message={responseError} />}
                     </form>
                 </div>
             </>
