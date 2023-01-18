@@ -47,7 +47,6 @@ export const conversationsApi = apiSlice.injectEndpoints({
                 if (conversation?.data?.id) {
                     const { sender, data } = arg;
                     const { users, message } = data;
-                    console.log(`users from edit conv api: ${users}`);
                     const senderUser = users.find((user) => user.email === sender);
                     const receiverUser = users.find((user) => user.email !== sender);
                     dispatch(

@@ -22,10 +22,10 @@ export default function Modal({ open, control }) {
     const [conversation, setConversation] = useState(undefined);
     const { user } = useSelector((state) => state.auth || {});
     const { email: loggedInUserEmail } = user || {};
+    const { data: loggedInUsersFullInformation } = useGetUserQuery(loggedInUserEmail);
     const { data: participant } = useGetUserQuery(to, {
         skip: !userCheck,
     });
-    const { data: loggedInUsersFullInformation } = useGetUserQuery(loggedInUserEmail);
 
     const dispatch = useDispatch();
 

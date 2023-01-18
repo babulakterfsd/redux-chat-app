@@ -34,7 +34,7 @@ export default function ChatBody() {
             <>
                 <ChatHead headInfo={messages[0]} />
                 <Messages messages={messages} />
-                <Options />
+                <Options usersInfoInMessage={messages[0]} />
             </>
         );
     }
