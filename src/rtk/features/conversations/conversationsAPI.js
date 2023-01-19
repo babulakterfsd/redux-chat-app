@@ -3,6 +3,8 @@ import io from 'socket.io-client';
 import { apiSlice } from '../api/apiSlice';
 import { messagesApi } from '../messages/messagesAPI';
 
+/* socket implement korar aag porjonto ei file pura thik chilo, kintu socket implement kore ki ki jeno guliye felchi, tai ei file ke baad dilam. kintu socket charao aager bepar gula ekhane comment kora ache valo kore, jeta dekhle pore shob bojha jabe easily, tai ei file rekhe dilam emni */
+
 export const conversationsApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getConversations: builder.query({
@@ -35,10 +37,11 @@ export const conversationsApi = apiSlice.injectEndpoints({
                         });
                     });
                 } catch (error) {
-                    // ami jodi onno component e jai, tahole to socket connection ta khule rakhar dorkar nai. tkhn dorkar hoy cacheEntryRemoved er
-                    await cacheEntryRemoved;
-                    socket.close();
+                    // nothing now
                 }
+                // ami jodi onno component e jai, tahole to socket connection ta khule rakhar dorkar nai. tkhn dorkar hoy cacheEntryRemoved er
+                await cacheEntryRemoved;
+                socket.close();
             },
         }),
         getConversation: builder.query({
