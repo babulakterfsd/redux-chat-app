@@ -19,21 +19,31 @@ export const conversationsApi = apiSlice.injectEndpoints({
                 body: data,
             }),
             async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-                const conversation = await queryFulfilled;
-                if (conversation?.data?.id) {
-                    const { sender, data } = arg;
-                    const { users, message } = data;
-                    const senderUser = users.find((user) => user.email === sender);
-                    const receiverUser = users.find((user) => user.email !== sender);
-                    dispatch(
-                        messagesApi.endpoints.addMessage.initiate({
-                            conversationId: conversation?.data?.id,
-                            sender: senderUser,
-                            receiver: receiverUser,
-                            message,
-                            timestamp: data.timestamp,
-                        })
-                    );
+                const patchResultTwo = dispatch(
+                    apiSlice.util.updateQueryData('getConversations', arg.sender, (draft) => {
+                        draft.push(arg.data);
+                    })
+                );
+
+                try {
+                    const conversation = await queryFulfilled;
+                    if (conversation?.data?.id) {
+                        const { sender, data } = arg;
+                        const { users, message } = data;
+                        const senderUser = users.find((user) => user.email === sender);
+                        const receiverUser = users.find((user) => user.email !== sender);
+                        dispatch(
+                            messagesApi.endpoints.addMessage.initiate({
+                                conversationId: conversation?.data?.id,
+                                sender: senderUser,
+                                receiver: receiverUser,
+                                message,
+                                timestamp: data.timestamp,
+                            })
+                        );
+                    }
+                } catch (error) {
+                    patchResultTwo.undo();
                 }
             },
         }),
