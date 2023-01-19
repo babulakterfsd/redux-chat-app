@@ -26,7 +26,9 @@ export default function ChatBody() {
     }
 
     if (!isLoading && !isError && messages?.length === 0) {
-        content = <div>No Messages Found !</div>;
+        content = (
+            <div className="flex justify-center items-center min-h-screen">No Messages Found !</div>
+        );
     }
 
     if (!isLoading && !isError && messages?.length > 0) {
