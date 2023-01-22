@@ -7,12 +7,9 @@ export const messagesApi = apiSlice.injectEndpoints({
         getMessages: builder.query({
             query: (id) =>
                 `/messages?conversationId=${id}&_sort=timestamp&_order=desc&_page=1&_limit=10`,
-            onCacheEntryAdded: async (
-                arg,
-                { updateCachedData, cacheDataLoaded, cacheEntryRemoved }
-            ) => {
+            async onCacheEntryAdded(arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
                 // create socket
-                const socket = io('http://localhost:9000', {
+                const socket = io(`http://localhost:9000`, {
                     reconnectionDelay: 1000,
                     reconnection: true,
                     reconnectionAttemps: 10,
@@ -21,18 +18,25 @@ export const messagesApi = apiSlice.injectEndpoints({
                     upgrade: false,
                     rejectUnauthorized: false,
                 });
+
                 try {
                     await cacheDataLoaded;
-                    socket.on('messageAdded', (data) => {
-                        if (data?.data?.conversationId == arg) {
-                            updateCachedData((draft) => {
-                                draft.data.unshift(data.data);
-                            });
-                        }
+                    socket.on('message', (data) => {
+                        console.log(data);
+                        const isConversationIdValid = data.data.conversationId == arg;
+                        updateCachedData((draft) => {
+                            // pessimistic update for messages through socket when new message is added to conversations
+                            if (isConversationIdValid) {
+                                draft.push(data.data);
+                            }
+                        });
                     });
                 } catch (err) {
-                    console.log(err);
+                    // do nothing
                 }
+
+                await cacheEntryRemoved;
+                socket.close();
             },
         }),
         addMessage: builder.mutation({

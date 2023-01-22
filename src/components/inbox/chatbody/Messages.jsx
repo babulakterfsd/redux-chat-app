@@ -16,7 +16,7 @@ export default function Messages({ messages = [] }) {
 
                         return (
                             <Message
-                                key={id}
+                                key={Math.random() * 9999}
                                 justify={sender?.email === email ? 'end' : 'start'}
                                 message={lastMessage}
                             />
