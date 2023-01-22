@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
-import logoImage from '../assets/images/lws-logo-light.svg';
+import logoImage from '../assets/images/babulakterfsd_circle.png';
 import Error from '../components/ui/Error';
 import { useLoginMutation } from '../rtk/features/auth/authAPI';
 
@@ -38,13 +38,12 @@ export default function Login() {
         <div className="grid place-items-center h-screen bg-[#F9FAFB">
             <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-md w-full space-y-8">
-                    <div>
-                        <Link to="/">
-                            <img
-                                className="mx-auto h-12 w-auto"
-                                src={logoImage}
-                                alt="Learn with sumit"
-                            />
+                    <div className="flex justify-center flex-col items-center">
+                        <Link to="/" className="flex gap-x-3 items-center">
+                            <img className="h-10" src={logoImage} alt="Learn with Sumit" />
+                            <span className=" font-semibold text-sm text-indigo-300">
+                                আওয়াল <br /> <span className="text-[12px]">এর </span> আড্ডাঘর
+                            </span>
                         </Link>
                         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
                             Sign in to your account
