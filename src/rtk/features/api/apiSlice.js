@@ -10,6 +10,9 @@ export const apiSlice = createApi({
             if (token) {
                 headers.set('Authorization', `Bearer ${token}`);
             }
+            if (token && endpoint === 'getMessages') {
+                headers.set('User-Email', getState()?.auth?.user?.email);
+            }
             return headers;
         },
     }),
