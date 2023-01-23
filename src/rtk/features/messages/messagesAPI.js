@@ -22,7 +22,6 @@ export const messagesApi = apiSlice.injectEndpoints({
                 try {
                     await cacheDataLoaded;
                     socket.on('message', (data) => {
-                        console.log(data);
                         const isConversationIdValid = data.data.conversationId == arg;
                         updateCachedData((draft) => {
                             // pessimistic update for messages through socket when new message is added to conversations
