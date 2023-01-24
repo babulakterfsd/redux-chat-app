@@ -13,7 +13,7 @@ export default function Inbox() {
     const { id } = useParams();
     const { user } = useSelector((state) => state.auth || {});
     const { email: loggedInUserEmail } = user || {};
-    const { data: conversations } = useGetConversationsQuery(loggedInUserEmail);
+    const { data: conversations, isLoading } = useGetConversationsQuery(loggedInUserEmail);
 
     useEffect(() => {
         const isIdMatched = conversations?.find((conv) => conv.id == id);
@@ -23,6 +23,20 @@ export default function Inbox() {
             setRedirect(false);
         }
     }, [id, conversations]);
+
+    if (isLoading) {
+        return (
+            <div>
+                <Navigation />
+                <div className="max-w-7xl mx-auto -mt-1">
+                    <div className="min-w-full border rounded flex lg:grid lg:grid-cols-3">
+                        <Sidebar />
+                        <ChatBody />
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (redirect) {
         return <NotFound />;
