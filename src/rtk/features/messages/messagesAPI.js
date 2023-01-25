@@ -17,7 +17,7 @@ export const messagesApi = apiSlice.injectEndpoints({
             },
             async onCacheEntryAdded(arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
                 // create socket
-                const socket = io(`http://localhost:9000`, {
+                const socket = io(`https://chat-app-server-agio.onrender.com`, {
                     reconnectionDelay: 1000,
                     reconnection: true,
                     reconnectionAttemps: 10,

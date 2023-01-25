@@ -99,13 +99,25 @@ export default function Login() {
                         </div>
 
                         <div>
-                            <button
-                                type="submit"
-                                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500"
-                                disabled={isLoading}
-                            >
-                                Sign in
-                            </button>
+                            {isLoading ? (
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500"
+                                >
+                                    <div className=" flex items-center justify-center">
+                                        <div className="w-6 h-6  border-b-2 border-white rounded-full animate-spin" />
+                                    </div>
+                                </button>
+                            ) : (
+                                <button
+                                    type="submit"
+                                    className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500"
+                                    disabled={isLoading}
+                                >
+                                    Sign in
+                                </button>
+                            )}
                         </div>
 
                         {error && <Error message={error} />}
