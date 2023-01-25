@@ -6,14 +6,13 @@ import { userLoggedOut } from '../../rtk/features/auth/authSlice';
 
 export default function Navigation() {
     const dispatch = useDispatch();
-    const { user } = useSelector((state) => state.auth || {});
+    const { user } = useSelector((state) => state.auth) || {};
     const { name } = user || {};
 
     const logout = () => {
         dispatch(userLoggedOut());
-        localStorage.removeItem('auth');
+        localStorage.clear();
     };
-
     return (
         <nav className="border-general sticky top-0 z-40 border-b bg-violet-700 transition-colors">
             <div className="max-w-7xl mx-auto">
@@ -25,7 +24,7 @@ export default function Navigation() {
                         </span>
                     </Link>
                     <div className="flex gap-x-4 justify-center items-center">
-                        <span className="text-white font-semibold text-sm">{`You're logged in as ${name}`}</span>
+                        <span className="text-white font-semibold text-sm">{`Hello, ${name}`}</span>
                     </div>
                     <ul>
                         <li className="text-red-400 font-semibold p-1 rounded-md">

@@ -8,7 +8,14 @@ export const conversationsApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getConversations: builder.query({
             query: (email) =>
-                `/conversations?participants_like=${email}&_sort=timestamp&_order=desc&_page=1&_limit=5`,
+                `/conversations?participants_like=${email}&_sort=timestamp&_order=desc&_page=1&_limit=10`,
+            transformResponse(apiResponse, meta) {
+                const totalCount = meta.response.headers.get('X-Total-Count');
+                return {
+                    data: apiResponse,
+                    totalCount,
+                };
+            },
             async onCacheEntryAdded(arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
                 // create socket
                 const socket = io(`http://localhost:9000`, {
@@ -26,27 +33,48 @@ export const conversationsApi = apiSlice.injectEndpoints({
                     socket.on('conversation', (data) => {
                         const loggedInUser = data.data.users.find((user) => user?.email == arg);
                         updateCachedData((draft) => {
-                            const conversation = draft.find((c) => c.id == data?.data?.id);
+                            const conversation = draft.data.find((c) => c.id == data?.data?.id);
 
                             if (conversation?.id) {
                                 conversation.message = data?.data?.message;
                                 conversation.timestamp = data?.data?.timestamp;
-                                draft.sort((a, b) => b.timestamp - a.timestamp);
+                                draft.data.sort((a, b) => b.timestamp - a.timestamp);
                             } else {
                                 // pessimistic update for conversations through socket when new conversation is created
                                 if (loggedInUser) {
-                                    draft.push(data.data);
-                                    draft.sort((a, b) => b.timestamp - a.timestamp);
+                                    draft.data.push(data.data);
+                                    draft.data.sort((a, b) => b.timestamp - a.timestamp);
                                 }
                             }
                         });
                     });
                 } catch (err) {
-                    // do nothing
+                    //
                 }
 
                 await cacheEntryRemoved;
                 socket.close();
+            },
+        }),
+        getMoreConversations: builder.query({
+            query: ({ email, page }) =>
+                `/conversations?participants_like=${email}&_sort=timestamp&_order=desc&_page=${page}&_limit=10`,
+            async onQueryStarted({ email }, { queryFulfilled, dispatch }) {
+                try {
+                    const conversations = await queryFulfilled;
+                    if (conversations?.data?.length > 0) {
+                        // update conversation cache pessimistically start
+                        dispatch(
+                            apiSlice.util.updateQueryData('getConversations', email, (draft) => ({
+                                data: [...draft.data, ...conversations.data],
+                                totalCount: Number(draft.totalCount),
+                            }))
+                        );
+                        // update messages cache pessimistically end
+                    }
+                } catch (err) {
+                    //
+                }
             },
         }),
         getConversation: builder.query({
@@ -60,6 +88,7 @@ export const conversationsApi = apiSlice.injectEndpoints({
                 method: 'POST',
                 body: data,
             }),
+            invalidatesTags: ['GetConversation'],
             async onQueryStarted(arg, { queryFulfilled, dispatch }) {
                 const conversation = await queryFulfilled;
                 if (conversation?.data?.id) {
@@ -99,7 +128,7 @@ export const conversationsApi = apiSlice.injectEndpoints({
                             'getMessages',
                             res.conversationId.toString(),
                             (draft) => {
-                                draft.push(res);
+                                draft?.data.push(res);
                             }
                         )
                     );
@@ -113,14 +142,15 @@ export const conversationsApi = apiSlice.injectEndpoints({
                 method: 'PATCH',
                 body: data,
             }),
+            invalidatesTags: ['GetConversation'],
             async onQueryStarted(arg, { queryFulfilled, dispatch }) {
                 // optimistic cache update start
                 const patchResult = dispatch(
                     apiSlice.util.updateQueryData('getConversations', arg.sender, (draft) => {
-                        const draftConversation = draft.find((c) => c.id == arg.id);
+                        const draftConversation = draft.data.find((c) => c.id == arg.id);
                         draftConversation.message = arg.data.message;
                         draftConversation.timestamp = arg.data.timestamp;
-                        draft = draft.sort((a, b) => b.timestamp - a.timestamp);
+                        draft.data = draft.data.sort((a, b) => b.timestamp - a.timestamp);
                     })
                 );
                 // optimistic cache update end

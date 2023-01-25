@@ -13,7 +13,8 @@ export default function Inbox() {
     const { id } = useParams();
     const { user } = useSelector((state) => state.auth || {});
     const { email: loggedInUserEmail } = user || {};
-    const { data: conversations, isLoading } = useGetConversationsQuery(loggedInUserEmail);
+    const { data, isLoading } = useGetConversationsQuery(loggedInUserEmail) || {};
+    const { data: conversations } = data || {};
 
     useEffect(() => {
         const isIdMatched = conversations?.find((conv) => conv.id == id);

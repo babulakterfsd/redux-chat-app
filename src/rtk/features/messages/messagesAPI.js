@@ -1,12 +1,20 @@
+/* eslint-disable no-empty */
 /* eslint-disable eqeqeq */
-import io from 'socket.io-client';
+import { io } from 'socket.io-client';
 import { apiSlice } from '../api/apiSlice';
 
 export const messagesApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getMessages: builder.query({
             query: (id) =>
-                `/messages?conversationId=${id}&_sort=timestamp&_order=desc&_page=1&_limit=10`,
+                `/messages?conversationId=${id}&_sort=timestamp&_order=desc&_page=1&_limit=15`,
+            transformResponse(apiResponse, meta) {
+                const totalCount = meta.response.headers.get('X-Total-Count');
+                return {
+                    data: apiResponse,
+                    totalCount,
+                };
+            },
             async onCacheEntryAdded(arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
                 // create socket
                 const socket = io(`http://localhost:9000`, {
@@ -26,16 +34,37 @@ export const messagesApi = apiSlice.injectEndpoints({
                         updateCachedData((draft) => {
                             // pessimistic update for messages through socket when new message is added to conversations
                             if (isConversationIdValid) {
-                                draft.push(data.data);
+                                draft.data.push(data.data);
                             }
                         });
                     });
-                } catch (err) {
-                    // do nothing
-                }
+                } catch (err) {}
 
                 await cacheEntryRemoved;
                 socket.close();
+            },
+        }),
+        getMoreMessages: builder.query({
+            query: ({ id, page }) =>
+                `/messages?conversationId=${id}&_sort=timestamp&_order=desc&_page=${page}&_limit=15`,
+            async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+                try {
+                    const result = await queryFulfilled;
+                    if (result?.data?.length > 0) {
+                        // update conversation cache pessimistically start
+                        dispatch(
+                            apiSlice.util.updateQueryData(
+                                'getMessages',
+                                arg.id.toString(),
+                                (draft) => ({
+                                    data: [...draft.data, ...result.data],
+                                    totalCount: Number(draft.totalCount),
+                                })
+                            )
+                        );
+                        // update messages cache pessimistically end
+                    }
+                } catch (err) {}
             },
         }),
         addMessage: builder.mutation({

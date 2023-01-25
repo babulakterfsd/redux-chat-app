@@ -3,11 +3,12 @@ import { useDispatch } from 'react-redux';
 import { userLoggedIn } from '../rtk/features/auth/authSlice';
 
 export default function useAuthCheck() {
-    const [authChecked, setAuthChecked] = useState(false);
     const dispatch = useDispatch();
+    const [authChecked, setAuthChecked] = useState(false);
 
     useEffect(() => {
         const localAuth = localStorage?.getItem('auth');
+
         if (localAuth) {
             const auth = JSON.parse(localAuth);
             if (auth?.accessToken && auth?.user) {
@@ -20,7 +21,7 @@ export default function useAuthCheck() {
             }
         }
         setAuthChecked(true);
-    }, [dispatch]);
+    }, [dispatch, setAuthChecked]);
 
     return authChecked;
 }

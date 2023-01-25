@@ -2,33 +2,39 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useEditConversationMutation } from '../../../rtk/features/conversations/conversationsAPI';
 
-export default function Options({ usersInfoInMessage }) {
+export default function Options({ info }) {
     const [message, setMessage] = useState('');
-    const { conversationId, sender, receiver } = usersInfoInMessage;
-    const [editConversation, { isSuccess: isEditConversationSuccess }] =
-        useEditConversationMutation();
-    const { user } = useSelector((state) => state.auth || {});
-    const { email: loggedInUserEmail } = user || {};
+    const [backup, setBackup] = useState('');
+    const [editConversation, { isSuccess, isError }] = useEditConversationMutation();
+
+    useEffect(() => {
+        if (isError) {
+            setMessage(backup);
+        }
+        if (isSuccess) {
+            setBackup('');
+        }
+    }, [isSuccess, backup, isError]);
+    const { user: loggedInUser } = useSelector((state) => state.auth);
+
+    const participantUser =
+        info.receiver.email !== loggedInUser.email ? info.receiver : info.sender;
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        // add conversation
         editConversation({
-            id: conversationId,
-            sender: loggedInUserEmail,
+            id: info?.conversationId,
+            sender: loggedInUser?.email,
             data: {
-                participants: `${sender.email}-${receiver.email}`,
-                users: [sender, receiver],
+                participants: `${loggedInUser.email}-${participantUser.email}`,
+                users: [loggedInUser, participantUser],
                 message,
                 timestamp: new Date().getTime(),
             },
         });
+        setMessage('');
     };
-
-    useEffect(() => {
-        if (isEditConversationSuccess) {
-            setMessage('');
-        }
-    }, [isEditConversationSuccess]);
 
     return (
         <form
@@ -38,11 +44,14 @@ export default function Options({ usersInfoInMessage }) {
             <input
                 type="text"
                 placeholder="Message"
-                className="block w-full py-2 pl-4 mx-3 bg-gray-100 focus:ring focus:ring-violet-100 rounded-full outline-none focus:text-gray-700"
+                className="block w-full py-2 pl-4 mx-3 bg-gray-100 focus:ring focus:ring-violet-500 rounded-full outline-none focus:text-gray-700"
                 name="message"
                 required
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={(e) => {
+                    setMessage(e.target.value);
+                    setBackup(e.target.value);
+                }}
             />
             <button type="submit">
                 <svg
