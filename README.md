@@ -1,5 +1,3 @@
-# This is also an starter pack for a combined package with react, vite, yarn, eslint, prettier and some other packages.
+# Real-time chat app : built with React, Redux-toolkit, socket-io, json-server and tailwindcss.
 
-### to remove hot update in the browser console that is shown by vite itself, go to node_modules > vite > dist > client > client.mjs
-
-###### then just remove the line 520 and return 0. if you comment it instead of remove, it will come back again later.
+- [Note: as it's a json server, all server data will be deleted after every 1 hour. To check website features, please create 2 accounts and start chating.]
